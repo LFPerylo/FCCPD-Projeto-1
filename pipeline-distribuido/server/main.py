@@ -2,8 +2,7 @@
 
 import socket
 import threading
-from multiprocessing import Process
-from server.processamento import thread_recebe, processo_processa, thread_responde
+from server.processamento import thread_recebe, thread_processa, thread_responde
 from utils.config import HOST, PORT
 
 def iniciar_servidor():
@@ -15,16 +14,11 @@ def iniciar_servidor():
     cliente_socket, endereco = servidor.accept()
     print(f"[SERVIDOR] Cliente conectado: {endereco}")
 
-    # Thread A: recebe dados do cliente
+    # Inicia 3 threads: recebe, processa, responde
     threading.Thread(target=thread_recebe, args=(cliente_socket,), daemon=True).start()
-
-    # Processo B: processa dados
-    Process(target=processo_processa, daemon=True).start()
-
-    # Thread C: envia resposta para o cliente
+    threading.Thread(target=thread_processa, daemon=True).start()
     threading.Thread(target=thread_responde, args=(cliente_socket,), daemon=True).start()
 
-    # Mantém o servidor vivo
     while True:
         pass
 

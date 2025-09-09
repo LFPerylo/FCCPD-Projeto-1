@@ -1,3 +1,5 @@
+# server/fila.py
+
 from queue import Queue
 
 class FilaLimitada:
@@ -5,7 +7,9 @@ class FilaLimitada:
         self.fila = Queue(maxsize=tamanho)
 
     def inserir(self, item):
-        self.fila.put(item)  # Bloqueia se a fila estiver cheia
+        print("[FILA] Inserindo item na fila")
+        self.fila.put(item)  # bloqueia se cheio
 
     def retirar(self):
-        return self.fila.get()  # Bloqueia se a fila estiver vazia
+        print("[FILA] Retirando item da fila")
+        return self.fila.get()  # bloqueia se vazio

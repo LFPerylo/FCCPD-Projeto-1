@@ -1,38 +1,46 @@
 # server/processamento.py
 
-import threading
 import time
-from multiprocessing import Process
 from server.fila import FilaLimitada
 from utils.config import TAMANHO_FILA
 
-# Filas para comunicação entre threads/processo
+# Filas compartilhadas entre threads
 fila1 = FilaLimitada(TAMANHO_FILA)
 fila2 = FilaLimitada(TAMANHO_FILA)
 
 def thread_recebe(cliente_socket):
+    print("[INICIADO] THREAD RECEBE")
     while True:
         try:
             dados = cliente_socket.recv(1024).decode()
             if not dados:
                 break
-            print(f"[RECEBIDO] {dados}")
+            print(f"[THREAD RECEBE] Recebido: {dados}")
             fila1.inserir(dados)
-        except:
+        except Exception as e:
+            print(f"[ERRO RECEBE] {e}")
             break
 
-def processo_processa():
+def thread_processa():
+    print("[INICIADO] THREAD PROCESSA")
     while True:
-        dado = fila1.retirar()
-        print(f"[PROCESSANDO] {dado}")
-        time.sleep(1)  # Simula tempo de processamento
-        processado = f"[PROCESSADO] {dado.upper()}"
-        fila2.inserir(processado)
+        try:
+            dado = fila1.retirar()
+            print(f"[THREAD PROCESSA] Processando: {dado}")
+            time.sleep(1)
+            processado = f"[PROCESSADO] {dado.upper()}"
+            fila2.inserir(processado)
+        except Exception as e:
+            print(f"[ERRO PROCESSA] {e}")
+            break
 
 def thread_responde(cliente_socket):
+    print("[INICIADO] THREAD RESPONDE")
     while True:
-        resposta = fila2.retirar()
         try:
+            resposta = fila2.retirar()
+            print(f"[THREAD RESPONDE] Enviando: {resposta}")
             cliente_socket.send(resposta.encode())
-        except:
+        except Exception as e:
+            print(f"[ERRO RESPONDE] {e}")
             break
