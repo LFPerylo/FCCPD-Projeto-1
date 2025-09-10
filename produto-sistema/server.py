@@ -1,28 +1,45 @@
-# servidor.py
+# server.py
 import socket
 import threading
 import datetime
+from queue import Queue
 
 produtos = []
 lock = threading.Lock()
+fila_comandos = Queue()
 
 def log(msg):
     agora = datetime.datetime.now().strftime("%H:%M:%S")
     thread_id = threading.current_thread().name
     print(f"[{agora}][{thread_id}] {msg}")
 
+# Estrutura do item na fila: (conn, comando_str)
+def consumidor():
+    while True:
+        conn, dados = fila_comandos.get()
+        if not dados:
+            continue
+        resposta = processar_comando(dados)
+        try:
+            conn.sendall(resposta.encode())
+        except:
+            log("Erro ao enviar resposta para cliente")
+
 def tratar_cliente(conn, addr):
-    log(f"Conexão estabelecida com {addr}")
+    log(f"Conexão com {addr}")
     conn.sendall("Bem-vindo ao sistema de produtos!\n".encode())
+
     while True:
         try:
             dados = conn.recv(1024).decode().strip()
             if not dados:
                 break
 
-            log(f"Recebido comando: '{dados}'")
-            resposta = processar_comando(dados)
-            conn.sendall(resposta.encode())
+            log(f"Recebido de {addr}: {dados}")
+            fila_comandos.put((conn, dados))
+
+            if dados.upper() == "SAIR":
+                break
         except:
             break
     conn.close()
@@ -40,7 +57,10 @@ def processar_comando(comando):
             log("Executando LISTAR")
             if not produtos:
                 return "Nenhum produto cadastrado.\n"
-            return "\n".join([f"{p['nome']} - R${p['preco']:.2f} - {p['quantidade']} unidades" for p in produtos]) + "\n"
+            return "\n".join([
+                f"{p['nome']} - R${p['preco']:.2f} - {p['quantidade']} unidades"
+                for p in produtos
+            ]) + "\n"
 
     elif operacao == "ADICIONAR" and len(partes) == 4:
         nome = partes[1]
@@ -51,7 +71,11 @@ def processar_comando(comando):
             return "Preço ou quantidade inválidos.\n"
         with lock:
             log(f"Adicionando produto: {nome}, preço={preco}, qtd={quantidade}")
-            produtos.append({"nome": nome, "preco": preco, "quantidade": quantidade})
+            produtos.append({
+                "nome": nome,
+                "preco": preco,
+                "quantidade": quantidade
+            })
         return f"Produto {nome} adicionado com sucesso.\n"
 
     elif operacao == "REMOVER" and len(partes) == 2:
@@ -75,10 +99,13 @@ def iniciar_servidor(host="127.0.0.1", porta=5000):
     servidor.listen()
     log(f"Servidor escutando em {host}:{porta}")
 
+    consumidor_thread = threading.Thread(target=consumidor, name="Consumidor", daemon=True)
+    consumidor_thread.start()
+
     while True:
         conn, addr = servidor.accept()
-        thread = threading.Thread(target=tratar_cliente, args=(conn, addr))
-        thread.start()
+        cliente_thread = threading.Thread(target=tratar_cliente, args=(conn, addr), name=f"Cliente-{addr[1]}")
+        cliente_thread.start()
 
 if __name__ == "__main__":
     iniciar_servidor()
