@@ -1,12 +1,18 @@
 # servidor.py
 import socket
 import threading
+import datetime
 
 produtos = []
 lock = threading.Lock()
 
+def log(msg):
+    agora = datetime.datetime.now().strftime("%H:%M:%S")
+    thread_id = threading.current_thread().name
+    print(f"[{agora}][{thread_id}] {msg}")
+
 def tratar_cliente(conn, addr):
-    print(f"[+] Conectado com {addr}")
+    log(f"Conexão estabelecida com {addr}")
     conn.sendall("Bem-vindo ao sistema de produtos!\n".encode())
     while True:
         try:
@@ -14,12 +20,13 @@ def tratar_cliente(conn, addr):
             if not dados:
                 break
 
+            log(f"Recebido comando: '{dados}'")
             resposta = processar_comando(dados)
             conn.sendall(resposta.encode())
         except:
             break
     conn.close()
-    print(f"[-] Cliente {addr} desconectado")
+    log(f"Cliente {addr} desconectado")
 
 def processar_comando(comando):
     partes = comando.split()
@@ -30,6 +37,7 @@ def processar_comando(comando):
 
     if operacao == "LISTAR":
         with lock:
+            log("Executando LISTAR")
             if not produtos:
                 return "Nenhum produto cadastrado.\n"
             return "\n".join([f"{p['nome']} - R${p['preco']:.2f} - {p['quantidade']} unidades" for p in produtos]) + "\n"
@@ -42,6 +50,7 @@ def processar_comando(comando):
         except ValueError:
             return "Preço ou quantidade inválidos.\n"
         with lock:
+            log(f"Adicionando produto: {nome}, preço={preco}, qtd={quantidade}")
             produtos.append({"nome": nome, "preco": preco, "quantidade": quantidade})
         return f"Produto {nome} adicionado com sucesso.\n"
 
@@ -50,6 +59,7 @@ def processar_comando(comando):
         with lock:
             for p in produtos:
                 if p["nome"] == nome:
+                    log(f"Removendo produto: {nome}")
                     produtos.remove(p)
                     return f"Produto {nome} removido.\n"
         return f"Produto {nome} não encontrado.\n"
@@ -63,7 +73,7 @@ def iniciar_servidor(host="127.0.0.1", porta=5000):
     servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     servidor.bind((host, porta))
     servidor.listen()
-    print(f"Servidor escutando em {host}:{porta}")
+    log(f"Servidor escutando em {host}:{porta}")
 
     while True:
         conn, addr = servidor.accept()
