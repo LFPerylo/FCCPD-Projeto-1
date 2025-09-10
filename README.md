@@ -44,6 +44,8 @@ Você verá a mensagem: `[SERVIDOR] Ouvindo em 127.0.0.1:5555...`
 Abra um **segundo terminal** e execute o arquivo do client `main.py`:
 
 ```bash
+cd pipeline-distribuido
+
 python -m client.main
 ```
 
