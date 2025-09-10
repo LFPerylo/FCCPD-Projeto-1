@@ -1,15 +1,16 @@
 # server/fila.py
 
-from queue import Queue
+import queue
 
 class FilaLimitada:
-    def __init__(self, tamanho):
-        self.fila = Queue(maxsize=tamanho)
+    def __init__(self, tamanho_maximo):
+        self.fila = queue.Queue(maxsize=tamanho_maximo)
 
     def inserir(self, item):
-        print("[FILA] Inserindo item na fila")
-        self.fila.put(item)  # bloqueia se cheio
+        print(f"\n[FILA] Inserindo item na fila")
+        self.fila.put(item)
 
     def retirar(self):
-        print("[FILA] Retirando item da fila")
-        return self.fila.get()  # bloqueia se vazio
+        item = self.fila.get()
+        print(f"\n[FILA] Retirado item da fila: {item}")
+        return item

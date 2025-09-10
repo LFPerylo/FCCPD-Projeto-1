@@ -1,32 +1,32 @@
 # server/processamento.py
 
 import time
+import threading
 from server.fila import FilaLimitada
 from utils.config import TAMANHO_FILA
 
-# Filas compartilhadas entre threads
 fila1 = FilaLimitada(TAMANHO_FILA)
 fila2 = FilaLimitada(TAMANHO_FILA)
 
 def thread_recebe(cliente_socket):
-    print("[INICIADO] THREAD RECEBE")
+    print(f"[INICIADO] THREAD RECEBE   | ID: {threading.get_ident()} | Nome: {threading.current_thread().name}\n")
     while True:
         try:
             dados = cliente_socket.recv(1024).decode()
             if not dados:
                 break
-            print(f"[THREAD RECEBE] Recebido: {dados}")
+            print(f"\n[THREAD RECEBE] Recebido: {dados}\n")
             fila1.inserir(dados)
         except Exception as e:
             print(f"[ERRO RECEBE] {e}")
             break
 
 def thread_processa():
-    print("[INICIADO] THREAD PROCESSA")
+    print(f"[INICIADO] THREAD PROCESSA | ID: {threading.get_ident()} | Nome: {threading.current_thread().name}\n")
     while True:
         try:
             dado = fila1.retirar()
-            print(f"[THREAD PROCESSA] Processando: {dado}")
+            print(f"\n[THREAD PROCESSA] Processando: {dado}\n")
             time.sleep(1)
             processado = f"[PROCESSADO] {dado.upper()}"
             fila2.inserir(processado)
@@ -35,11 +35,11 @@ def thread_processa():
             break
 
 def thread_responde(cliente_socket):
-    print("[INICIADO] THREAD RESPONDE")
+    print(f"[INICIADO] THREAD RESPONDE | ID: {threading.get_ident()} | Nome: {threading.current_thread().name}\n")
     while True:
         try:
             resposta = fila2.retirar()
-            print(f"[THREAD RESPONDE] Enviando: {resposta}")
+            print(f"\n[THREAD RESPONDE] Enviando: {resposta}\n")
             cliente_socket.send(resposta.encode())
         except Exception as e:
             print(f"[ERRO RESPONDE] {e}")
