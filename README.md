@@ -30,7 +30,7 @@ Para testar o sistema, siga os passos abaixo. Certifique-se de que você tem o P
 Abra um terminal, navegue até a pasta `pipeline-distribuido` e execute o arquivo `main.py`:
 
 ```bash
-cd pipeline distribuido
+cd pipeline-distribuido
 
 python -m server.main
 ```
