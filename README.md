@@ -27,11 +27,12 @@ Para testar o sistema, siga os passos abaixo. Certifique-se de que você tem o P
 
 ### 1\. Iniciar o Servidor
 
-Abra um terminal, navegue até a pasta `server` e execute o arquivo `main.py`:
+Abra um terminal, navegue até a pasta `pipeline-distribuido` e execute o arquivo `main.py`:
 
 ```bash
-cd server
-python main.py
+cd pipeline distribuido
+
+python -m server.main
 ```
 
 Você verá a mensagem: `[SERVIDOR] Ouvindo em 127.0.0.1:5555...`
@@ -40,11 +41,10 @@ Você verá a mensagem: `[SERVIDOR] Ouvindo em 127.0.0.1:5555...`
 
 ### 2\. Iniciar o Cliente
 
-Abra um **segundo terminal**, navegue até a pasta `client` e execute o arquivo `main.py`:
+Abra um **segundo terminal** e execute o arquivo do client `main.py`:
 
 ```bash
-cd client
-python main.py
+python -m client.main
 ```
 
 Você verá a mensagem: `[CLIENTE] Conectado ao servidor em 127.0.0.1:5555`.
