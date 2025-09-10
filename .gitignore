@@ -1,0 +1,22 @@
+# 🐍 Arquivos Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 📦 Ambiente virtual (caso use)
+venv/
+.env/
+.envrc
+
+# 🛠 VSCode config (opcional)
+.vscode/
+
+# 💾 Arquivos de backup
+*.log
+*.tmp
+*.bak
+*.swp
+
+# 📁 Arquivos do sistema (Linux, macOS, Windows)
+.DS_Store
+Thumbs.db
